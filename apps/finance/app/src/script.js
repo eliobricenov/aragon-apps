@@ -1,7 +1,7 @@
 import Aragon from '@aragon/client'
 import { of } from './rxjs'
 import { getTestTokenAddresses } from './testnet'
-import { ETHER_TOKEN_FAKE_ADDRESS, isTokenVerified } from './lib/token-utils'
+import { ETHER_TOKEN_FAKE_ADDRESS, isTokenVerified, getTokenSymbol } from './lib/token-utils'
 import { addressesEqual } from './lib/web3-utils'
 import tokenDecimalsAbi from './abi/token-decimals.json'
 import tokenNameAbi from './abi/token-name.json'
@@ -330,25 +330,7 @@ function loadTokenName(tokenContract) {
 }
 
 function loadTokenSymbol(tokenContract) {
-  return new Promise((resolve, reject) => {
-    if (tokenSymbols.has(tokenContract)) {
-      resolve(tokenSymbols.get(tokenContract))
-    } else {
-      tokenContract
-        .symbol()
-        .first()
-        .subscribe(
-          symbol => {
-            tokenSymbols.set(tokenContract, symbol)
-            resolve(symbol)
-          },
-          () => {
-            // Symbol is optional
-            resolve('')
-          }
-        )
-    }
-  })
+  return getTokenSymbol(tokenSymbols,tokenContract)
 }
 
 function loadTransactionDetails(id) {

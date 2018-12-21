@@ -18,7 +18,7 @@ import tokenDecimalsAbi from '../../abi/token-decimals.json'
 import tokenSymbolAbi from '../../abi/token-symbol.json'
 import { fromDecimals, toDecimals } from '../../lib/math-utils'
 import provideNetwork from '../../lib/provideNetwork'
-import { ETHER_TOKEN_FAKE_ADDRESS } from '../../lib/token-utils'
+import { ETHER_TOKEN_FAKE_ADDRESS, getTokenData } from '../../lib/token-utils'
 import { addressesEqual, isAddress } from '../../lib/web3-utils'
 import { combineLatest } from '../../rxjs'
 import ToggleContent from '../ToggleContent'
@@ -84,7 +84,8 @@ class Deposit extends React.Component {
     // Set the initial loading state before we go async
     this.setState({ selectedToken }, async () => {
       const tokenData = await this.loadTokenData(address)
-
+      console.log('tokenData')      
+      console.log(tokenData)
       // Make sure we still want the information about this token after the async call,
       // in case the token was changed before this finished loading
       if (this.state.selectedToken.value === address) {
@@ -99,6 +100,10 @@ class Deposit extends React.Component {
         })
       }
     })
+
+    console.log('selected token')
+    console.log(this.state.selectedToken)
+    
   }
   handleReferenceUpdate = event => {
     this.setState({ reference: event.target.value })
@@ -140,31 +145,13 @@ class Deposit extends React.Component {
             reject
           )
       )
-    }
+    } 
+    
 
-    // Tokens
-    const token = app.external(address, tokenAbi)
-
-    return new Promise((resolve, reject) =>
-      combineLatest(
-        token.symbol(),
-        token.decimals(),
-        token.balanceOf(userAccount)
-      )
-        .first()
-        .subscribe(
-          ([symbol, decimals, userBalance]) =>
-            resolve({
-              symbol,
-              userBalance,
-              decimals: parseInt(decimals, 10),
-              loading: false,
-            }),
-          reject
-        )
-    )
+    return getTokenData(app,userAccount,address)
+  
   }
-  validateInputs({ amount, selectedToken } = {}) {
+  validateInputs({ amount, selectedToken } = {}) {    
     amount = amount || this.state.amount
     selectedToken = selectedToken || this.state.selectedToken
 
